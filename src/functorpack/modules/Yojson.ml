@@ -130,16 +130,18 @@ module Safe = struct
     let read_bin16 = read_fixstr
     let read_bin32 = read_fixstr
 
-    let rec rev_first n l acc =
+    let rec extract_array n l acc =
       if n = 0 then
-        acc
+        (acc, l)
       else
         match l with
           | [] -> assert false
-          | x :: l' -> rev_first (n-1) l' (x :: acc)
+          | x :: l' -> extract_array (n-1) l' (x :: acc)
 
     let read_fixarray_start n frag = frag
-    let read_fixarray_end n frag = `List (rev_first n frag []) :: frag
+    let read_fixarray_end n frag =
+      let l, frag = extract_array n frag [] in
+      `List l :: frag
 
     let read_array16_start = read_fixarray_start
     let read_array16_end = read_fixarray_end
@@ -149,7 +151,7 @@ module Safe = struct
 
     let rec extract_map n l acc =
       if n = 0 then
-        acc
+        (acc, l)
       else
         match l with
           | [] -> assert false
@@ -164,7 +166,9 @@ module Safe = struct
 
     let read_fixmap_start n frag = frag
     let read_fixmap_next frag = frag
-    let read_fixmap_end n frag = `Assoc (extract_map n frag []) :: frag
+    let read_fixmap_end n frag =
+      let l, frag = extract_map n frag [] in
+      `Assoc l :: frag
 
     let read_map16_start = read_fixmap_start
     let read_map16_next = read_fixmap_next
@@ -204,5 +208,61 @@ module Safe = struct
     let module E = Extract.Make(Extractor) in
     E.extract_bytes by pos len
 
+  module Compose(C : Types.MESSAGE_COMPOSER) = struct
+    let compose j =
+      let rec recurse frag j =
+        match j with
+          | `Null ->
+              C.write_nil frag
+          | `Bool b ->
+              C.write_bool b frag
+          | `Int n ->
+              C.write_int_best n frag
+          | `Intlit s ->
+              ( try
+                  let n = Int64.of_string s in
+                  C.write_int64 n frag
+                with
+                  | Failure _ ->
+                      (* TODO: also support uint64 *)
+                      raise Composer.Error
+              )
+          | `Float x ->
+              C.write_float64 x frag
+          | `String s ->
+              C.write_str_best s 0 (String.length s) frag
+          | `List l ->
+              let n = List.length l in
+              let f_start, f_end = C.write_array_best n in
+              let frag = f_start n frag in
+              let frag = List.fold_left recurse frag l in
+              f_end n frag
+          | `Assoc l ->
+              let n = List.length l in
+              let f_start, f_next, f_end = C.write_map_best n in
+              let frag = f_start n frag in
+              let _, frag =
+                List.fold_left
+                  (fun (i,frag) (key,value) ->
+                    let frag = if i > 0 then f_next frag else frag in
+                    let frag = recurse frag (`String key) in
+                    let frag = recurse frag value in
+                    (i+1, frag)
+                  )
+                  (0,frag)
+                  l in
+              f_end n frag
+          | `Tuple _ ->
+              failwith "FPack.Yojson.Safe.compose_bytes: `Tuple not supported"
+          | `Variant _ ->
+              failwith "FPack.Yojson.Safe.compose_bytes: `Variant not supported"
+      in
+      C.compose (recurse (C.create()) j)
+  end
+
+  let compose_bytes json =
+    let module C = Composer.Checker(Composer.Bytes) in
+    let module P = Compose(C) in
+    P.compose json
 
 end

@@ -27,7 +27,7 @@ module Make(X : Types.MESSAGE_EXTRACTOR) = struct
     let n2 = read_int32 by pos endpos in
     Int64.logor
       (Int64.shift_left (Int64.of_int32 n1) 32)
-      (Int64.of_int32 n2)
+      (Int64.logand (Int64.of_int32 n2) 0xFFFF_FFFFL)
 
   let read_int8 by pos endpos =
     let n = read_uint8 by pos endpos in

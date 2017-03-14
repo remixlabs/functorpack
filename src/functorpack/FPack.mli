@@ -70,21 +70,28 @@ module Types : sig
     val write_int16 : int -> fragment -> fragment
     val write_int32 : int32 -> fragment -> fragment
     val write_int64 : int64 -> fragment -> fragment
+    val write_int_best : int -> fragment -> fragment
+    val write_int64_best : int64 -> fragment -> fragment
     val write_float32 : float -> fragment -> fragment
     val write_float64 : float -> fragment -> fragment
     val write_fixstr : string -> int -> int -> fragment -> fragment
     val write_str8 : string -> int -> int -> fragment -> fragment
     val write_str16 : string -> int -> int -> fragment -> fragment
     val write_str32 : string -> int -> int -> fragment -> fragment
+    val write_str_best : string -> int -> int -> fragment -> fragment
     val write_bin8 : string -> int -> int -> fragment -> fragment
     val write_bin16 : string -> int -> int -> fragment -> fragment
     val write_bin32 : string -> int -> int -> fragment -> fragment
+    val write_bin_best : string -> int -> int -> fragment -> fragment
     val write_fixarray_start : int -> fragment -> fragment
     val write_fixarray_end : int -> fragment -> fragment
     val write_array16_start : int -> fragment -> fragment
     val write_array16_end : int -> fragment -> fragment
     val write_array32_start : int -> fragment -> fragment
     val write_array32_end : int -> fragment -> fragment
+    val write_array_best : int ->
+                           (int -> fragment -> fragment) *
+                             (int -> fragment -> fragment)
     val write_fixmap_start : int -> fragment -> fragment
     val write_fixmap_next : fragment -> fragment
     val write_fixmap_end : int -> fragment -> fragment
@@ -94,6 +101,10 @@ module Types : sig
     val write_map32_start : int -> fragment -> fragment
     val write_map32_next : fragment -> fragment
     val write_map32_end : int -> fragment -> fragment
+    val write_map_best : int ->
+                         (int -> fragment -> fragment) *
+                           (fragment -> fragment) *
+                             (int -> fragment -> fragment)
     val write_fixext1 : int -> int -> fragment -> fragment
     val write_fixext2 : int -> int -> fragment -> fragment
     val write_fixext4 : int -> int32 -> fragment -> fragment
@@ -116,12 +127,10 @@ module Extract : sig
 end
 
 module Composer : sig
+  exception Error
   module Bytes : Types.MESSAGE_COMPOSER with type message = bytes
-(*
   module Checker(C : Types.MESSAGE_COMPOSER) :
            Types.MESSAGE_COMPOSER with type message = C.message
-                                   and type fragment = C.fragment
- *)
 end
 
 
@@ -148,13 +157,11 @@ module Yojson : sig
                        and type fragment = json list
 
     val extract_bytes : bytes -> int -> int -> json
-(*
     module Compose(C : Types.MESSAGE_COMPOSER) : sig
       val compose : json -> C.message
     end
 
     val compose_bytes : json -> bytes
- *)
   end
 end
      

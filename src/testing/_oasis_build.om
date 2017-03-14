@@ -4,26 +4,23 @@ ENABLE_SYNTAX_CAMLP4O = $"false"
 DEFINE_RULES[] =
 
 section
-    if $(not $(defined SKIP_BUILD_FPack))
-        SKIP_BUILD_FPack = false
-        export SKIP_BUILD_FPack
-    if $(not $(SKIP_BUILD_FPack))
-        NAME = $"FPack"
-        CNAME = $"FPack"
+    if $(not $(defined SKIP_BUILD_testing))
+        SKIP_BUILD_testing = false
+        export SKIP_BUILD_testing
+    if $(not $(SKIP_BUILD_testing))
+        NAME = $"testing"
+        CNAME = $"Testing"
         MODULES[] =
-            $"modules/Types"
-            $"modules/Extract"
-            $"modules/Composer"
-            $"modules/Yojson"
+            $"T_frame"
             $(OASIS_getvar EXTRA_MODULES)
-        MODULES_FPack[] =
+        MODULES_testing[] =
             $(MODULES)
         OCAML_LIBS[] =
             $(OASIS_getvar EXTRA_OCAML_LIBS)
         C_SOURCES[] =
         C_OBJECTS = $(replacesuffixes .c, $(EXT_OBJ), $(C_SOURCES))
         C_OBJECTS += $(OASIS_getvar EXTRA_C_OBJECTS)
-        C_SOURCES_FPack[] =
+        C_SOURCES_testing[] =
             $(C_SOURCES)
         if true
             OCAML_LIB_CCLIB[] =
@@ -56,19 +53,19 @@ section
         OCAMLCFLAGS += $(ocamlcflags)
         OCAMLOPTFLAGS += $(ocamloptflags)
         OCAMLINCLUDES[] +=
-            $(OASIS_getvar_for FPack, EXTRA_OCAMLINCLUDES)
+            $(OASIS_getvar_for testing, EXTRA_OCAMLINCLUDES)
         OCAMLPACKS[] +=
-            $(OASIS_getvar_for FPack, EXTRA_OCAMLPACKS)
+            $"str"
+            $(OASIS_getvar_for testing, EXTRA_OCAMLPACKS)
         DefineRules() =
-            OASIS_build_OCamlPack($(NAME), $(MODULES))
-            OASIS_build_OCamlLibrary($(NAME), $(NAME), $(C_OBJECTS))
+            OASIS_build_OCamlLibrary($(NAME), $(MODULES), $(C_OBJECTS))
         if true
             BUILD_TARGETS[] +=
                 $(OASIS_target_OCamlLibrary $(NAME))
             export BUILD_TARGETS
         DEFINE_RULES[] +=
             $(DefineRules)
-        export BUILD_TARGETS DEFINE_RULES MODULES_FPack C_SOURCES_FPack
+        export BUILD_TARGETS DEFINE_RULES MODULES_testing C_SOURCES_testing
     export
 
 
@@ -85,12 +82,10 @@ if true
     OCAMLOPTFLAGS[] +=
     export OCAMLOPTFLAGS
 OCAMLINCLUDES[] +=
-    $(OASIS_getvar_for FPack, EXTRA_OCAMLINCLUDES)
+    $(OASIS_getvar_for testing, EXTRA_OCAMLINCLUDES)
 OCAMLPACKS[] +=
-    $(OASIS_getvar_for FPack, EXTRA_OCAMLPACKS)
-OCAMLOPTFLAGS[] +=
-    -for-pack
-    $"FPack"
+    $"str"
+    $(OASIS_getvar_for testing, EXTRA_OCAMLPACKS)
 if $(ENABLE_SYNTAX_CAMLP4O)
     OCAMLFINDFLAGS += -syntax camlp4o
     export OCAMLFINDFLAGS

@@ -9,7 +9,7 @@ BuildType:   OMake (0.4)
 InstallType: OMake (0.4)
 OCamlVersion: >= 4.04
 
-Library functorpack
+Library FPack
   Pack:              true
   Modules:           modules/Types,
                      modules/Extract,
@@ -17,3 +17,16 @@ Library functorpack
                      modules/Yojson
   Path:              src/functorpack
   Install:           true
+
+Library testing
+  Modules:      T_frame
+  Path:         src/testing
+  BuildDepends: str
+  Install:      false
+
+Executable unittests
+  Path:         progs
+  MainIs:       Unittests.ml
+  BuildDepends: FPack, testing
+  Install:      false
+  

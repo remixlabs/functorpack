@@ -4,18 +4,15 @@ REINSTALL_TARGETS[] =
 DEFINE_RULES[] =
 
 section
-    if $(not $(defined SKIP_INSTALL_FPack))
-        SKIP_INSTALL_FPack = false
-        export SKIP_INSTALL_FPack
-    if $(not $(SKIP_INSTALL_FPack))
-        NAME = $"FPack"
-        FINDLIB_NAME = $"FPack"
+    if $(not $(defined SKIP_INSTALL_testing))
+        SKIP_INSTALL_testing = false
+        export SKIP_INSTALL_testing
+    if $(not $(SKIP_INSTALL_testing))
+        NAME = $"testing"
+        FINDLIB_NAME = $"testing"
         FINDLIB_PARENT = $(FINDLIB_NAME)
         INSTALL_MODULES[] =
-            $"modules/Types"
-            $"modules/Extract"
-            $"modules/Composer"
-            $"modules/Yojson"
+            $"T_frame"
             $(OASIS_getvar EXTRA_INSTALL_MODULES)
         INSTALL_FILES[] =
             $"META"
@@ -31,7 +28,7 @@ section
             OASIS_uninstall_OCamlLibrary($(NAME), $(FINDLIB_NAME), $(FINDLIB_PARENT))
             OASIS_reinstall_OCamlLibrary($(NAME), $(FINDLIB_NAME), $(FINDLIB_PARENT), $(INSTALL_FILES), $(INSTALL_OPTIONAL_FILES))
             OASIS_uninstall_data_OCamlLibrary($(NAME))
-        if true
+        if false
             INSTALL_TARGETS[] +=
                 $(OASIS_installtarget_OCamlLibrary $(NAME))
             UNINSTALL_TARGETS[] +=

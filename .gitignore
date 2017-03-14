@@ -20,3 +20,5 @@ setup.data
 _oasis_setup.om
 .omakedb
 .omakedb.lock
+
+progs/unittests

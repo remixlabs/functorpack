@@ -1,0 +1,2 @@
+requires = "str"
+archive(byte) = "testing.cma"

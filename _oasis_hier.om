@@ -1,2 +1,3 @@
 OASIS_SUBDIRS[] =
+    $"progs"
     $"src"
