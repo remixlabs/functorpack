@@ -1,0 +1,6 @@
+description = "MessagePack packer and unpacker"
+requires = ""
+archive(byte) = "functorpack.cma"
+archive(native) = "functorpack.cmxa"
+archive(native,plugin) = "functorpack.cmxs"
+exists_if = "functorpack.cma"

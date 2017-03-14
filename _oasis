@@ -1,0 +1,19 @@
+OASISFormat: 0.4
+Name:        functorpack
+Version:     0.0
+Synopsis:    MessagePack support
+Authors:     Gerd Stolpmann
+License:     http://fig.ly/internal
+BuildTools+: omake
+BuildType:   OMake (0.4)
+InstallType: OMake (0.4)
+OCamlVersion: >= 4.04
+
+Library functorpack
+  Pack:              true
+  Modules:           modules/Types,
+                     modules/Extract,
+                     modules/Composer,
+                     modules/Yojson
+  Path:              src/functorpack
+  Install:           true

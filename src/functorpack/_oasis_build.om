@@ -1,0 +1,97 @@
+BUILD_TARGETS[] =
+BUILD_DOC_TARGETS[] =
+ENABLE_SYNTAX_CAMLP4O = $"false"
+DEFINE_RULES[] =
+
+section
+    if $(not $(defined SKIP_BUILD_functorpack))
+        SKIP_BUILD_functorpack = false
+        export SKIP_BUILD_functorpack
+    if $(not $(SKIP_BUILD_functorpack))
+        NAME = $"functorpack"
+        CNAME = $"Functorpack"
+        MODULES[] =
+            $"modules/Types"
+            $"modules/Extract"
+            $"modules/Composer"
+            $"modules/Yojson"
+            $(OASIS_getvar EXTRA_MODULES)
+        MODULES_functorpack[] =
+            $(MODULES)
+        OCAML_LIBS[] =
+            $(OASIS_getvar EXTRA_OCAML_LIBS)
+        C_SOURCES[] =
+        C_OBJECTS = $(replacesuffixes .c, $(EXT_OBJ), $(C_SOURCES))
+        C_OBJECTS += $(OASIS_getvar EXTRA_C_OBJECTS)
+        C_SOURCES_functorpack[] =
+            $(C_SOURCES)
+        if true
+            OCAML_LIB_CCLIB[] =
+            export OCAML_LIB_CCLIB
+        OCAML_LIB_CCLIB[] +=
+            $(OASIS_getvar EXTRA_OCAML_LIB_CCLIB)
+        if true
+            OCAML_LIB_DLLIB[] =
+            export OCAML_LIB_DLLIB
+        OCAML_LIB_DLLIB[] +=
+            $(OASIS_getvar EXTRA_OCAML_LIB_DLLIB)
+        if true
+            OCAML_LIB_DLLPATH[] =
+            export OCAML_LIB_DLLPATH
+        OCAML_LIB_DLLPATH[] +=
+            $(OASIS_getvar EXTRA_OCAML_LIB_DLLPATH)
+        OCAML_LIB_FLAGS[] =
+            $(OASIS_getvar EXTRA_OCAML_LIB_FLAGS)
+        OCAMLFINDFLAGS[] =
+            $(OASIS_getvar EXTRA_OCAMLFINDFLAGS)
+        if true
+            cflags[] =
+            export cflags
+        if true
+            ocamlcflags[] =
+            export ocamlcflags
+        if true
+            ocamloptflags[] =
+            export ocamloptflags
+        OCAMLCFLAGS += $(ocamlcflags)
+        OCAMLOPTFLAGS += $(ocamloptflags)
+        OCAMLINCLUDES[] +=
+            $(OASIS_getvar_for functorpack, EXTRA_OCAMLINCLUDES)
+        OCAMLPACKS[] +=
+            $(OASIS_getvar_for functorpack, EXTRA_OCAMLPACKS)
+        DefineRules() =
+            OASIS_build_OCamlPack($(NAME), $(MODULES))
+            OASIS_build_OCamlLibrary($(NAME), $(NAME), $(C_OBJECTS))
+        if true
+            BUILD_TARGETS[] +=
+                $(OASIS_target_OCamlLibrary $(NAME))
+            export BUILD_TARGETS
+        DEFINE_RULES[] +=
+            $(DefineRules)
+        export BUILD_TARGETS DEFINE_RULES MODULES_functorpack C_SOURCES_functorpack
+    export
+
+
+DefineBuildRules() =
+    OASIS_run($(DEFINE_RULES))
+OCAMLINCLUDES = .
+if true
+    CFLAGS[] +=
+    export CFLAGS
+if true
+    OCAMLCFLAGS[] +=
+    export OCAMLCFLAGS
+if true
+    OCAMLOPTFLAGS[] +=
+    export OCAMLOPTFLAGS
+OCAMLINCLUDES[] +=
+    $(OASIS_getvar_for functorpack, EXTRA_OCAMLINCLUDES)
+OCAMLPACKS[] +=
+    $(OASIS_getvar_for functorpack, EXTRA_OCAMLPACKS)
+OCAMLOPTFLAGS[] +=
+    -for-pack
+    $"Functorpack"
+if $(ENABLE_SYNTAX_CAMLP4O)
+    OCAMLFINDFLAGS += -syntax camlp4o
+    export OCAMLFINDFLAGS
+

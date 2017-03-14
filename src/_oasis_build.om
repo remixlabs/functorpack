@@ -1,0 +1,9 @@
+BUILD_TARGETS[] =
+BUILD_DOC_TARGETS[] =
+ENABLE_SYNTAX_CAMLP4O = $"false"
+DefineBuildRules() =
+
+if $(ENABLE_SYNTAX_CAMLP4O)
+    OCAMLFINDFLAGS += -syntax camlp4o
+    export OCAMLFINDFLAGS
+
