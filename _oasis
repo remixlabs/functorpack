@@ -14,7 +14,8 @@ Library FPack
   Modules:           modules/Types,
                      modules/Extract,
                      modules/Composer,
-                     modules/Yojson
+                     modules/Yojson,
+                     modules/Figly
   Path:              src/functorpack
   Install:           true
 

@@ -87,6 +87,29 @@ let test007() =
   j = j'
   
 
+module F = Figly.Make(Figly.Data)
+
+
+let test100() =
+  let open Figly.Data in
+  let s = "\135\163age!\164city\169palo alto\164name\165vijay\165:type\164user\165group\213\"\1615\169:figly/id\1617\170:full-name\178Vijay Chakravarthy" in
+  let b = Bytes.of_string s in
+  let d = F.extract_bytes b 0 (Bytes.length b) in
+  match d with
+    | Dobject o ->
+        SMap.bindings o =
+          [ ":figly/id", Dstring "7";
+            ":full-name", Dstring "Vijay Chakravarthy";
+            ":type", Dstring "user";
+            "age", Dint 33L;
+            "city", Dstring "palo alto";
+            "group", Dref "5";
+            "name", Dstring "vijay";
+          ]
+    | _ ->
+        false
+
+
 let tests =
   [ "test001", test001;
     "test002", test002;
@@ -95,6 +118,7 @@ let tests =
     "test005", test005;
     "test006", test006;
     "test007", test007;
+    "test100", test100;
   ]
 
 let () =

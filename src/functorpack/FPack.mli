@@ -166,4 +166,43 @@ module Yojson : sig
     val compose_bytes : json -> bytes
   end
 end
-     
+
+module Figly : sig
+  exception Cannot_represent of string
+  module type DATA = sig
+    (** Maps from string to anything *)
+    module SMap : Map.S with type key = string
+
+    type data =
+      | Dnull                (** null *)
+      | Dbool of bool        (** true or false *)
+      | Dint of int64        (** integers *)
+      | Dfloat of float      (** floating-points numbers *)
+      | Dstring of string    (** strings *)
+      | Dbinary of string    (** binary data *)
+      | Dobject of data SMap.t   (** objects are mappings from strings to data *)
+      | Darray of data array     (** arrays of data *)
+      | Dref of string           (** Ref to this ID *)
+
+  end
+
+
+  (** Use it like:
+
+      {[ module F = FPack.Figly.Make(FPack.Figly.Data) ]}
+
+      then call [F.extract_byte] and [F.compose_bytes].
+   *)
+  module Make(D : DATA) : sig
+    val extract_bytes : bytes -> int -> int -> D.data
+    val compose_bytes : D.data -> bytes
+  end
+
+  module Data : DATA
+    (** This is just a sample implementation. Feel free to use anything
+        else that also defines the same [data] type.
+     *)
+
+end
+
+

@@ -15,6 +15,7 @@ section
             $"modules/Extract"
             $"modules/Composer"
             $"modules/Yojson"
+            $"modules/Figly"
             $(OASIS_getvar EXTRA_MODULES)
         MODULES_FPack[] =
             $(MODULES)
