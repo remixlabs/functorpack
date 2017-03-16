@@ -339,6 +339,22 @@ module Bytes = struct
     add_int64 buf n2;
     buf
 
+  let write_fixext t str buf =
+    if t < 0 || t > 255 then raise Error;
+    let n = String.length str in
+    let tag =
+      match n with
+        | 1 -> '\xd4'
+        | 2 -> '\xd5'
+        | 4 -> '\xd6'
+        | 8 -> '\xd7'
+        | 16 -> '\xd8'
+        | _ -> invalid_arg "FPack.Compose.Bytes.write_fixext: bad length" in
+    Buffer.add_char buf tag;
+    add_uint8 buf t;
+    Buffer.add_string buf str;
+    buf
+
   let write_ext8 t s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
       invalid_arg "FPack.Composer.Bytes.write_ext8";
@@ -368,6 +384,21 @@ module Bytes = struct
     add_uint8 buf t;
     Buffer.add_substring buf s pos len;
     buf
+
+  let write_ext_best t s pos len buf =
+    if pos < 0 || len < 0 || pos > String.length s - len then
+      invalid_arg "FPack.Composer.Bytes.write_ext_best";
+    if t < 0 || t > 255 then raise Error;
+    if len=1 || len=2 || len=4 || len=8 || len=16 then
+      write_fixext t (String.sub s pos len) buf
+    else
+      if len <= 255 then
+        write_ext8 t s pos len buf
+      else if len <= 65536 then
+        write_ext16 t s pos len buf
+      else
+        write_ext32 t s pos len buf
+
 end
 
 module Checker(C : Types.MESSAGE_COMPOSER) = struct
@@ -457,9 +488,12 @@ module Checker(C : Types.MESSAGE_COMPOSER) = struct
   let write_fixext8 t n (frag,cl) = (C.write_fixext8 t n frag, record cl)
   let write_fixext16 t n1 n2 (frag,cl) = (C.write_fixext16 t n1 n2 frag,
                                           record cl)
+  let write_fixext t s (frag,cl) = (C.write_fixext t s frag, record cl)
   let write_ext8 t s p l (frag,cl) = (C.write_ext8 t s p l frag, record cl)
   let write_ext16 t s p l (frag,cl) = (C.write_ext16 t s p l frag, record cl)
   let write_ext32 t s p l (frag,cl) = (C.write_ext32 t s p l frag, record cl)
+  let write_ext_best t s p l (frag,cl) = (C.write_ext_best t s p l frag,
+                                          record cl)
 
   let write_fixarray_start n (frag,cl) =
     (C.write_fixarray_start n frag,

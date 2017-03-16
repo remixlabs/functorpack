@@ -40,11 +40,11 @@ module type MESSAGE_EXTRACTOR = sig
   val read_map32_start : int -> fragment -> fragment
   val read_map32_next : fragment -> fragment
   val read_map32_end : int -> fragment -> fragment
-  val read_fixext1 : int -> int -> fragment -> fragment
-  val read_fixext2 : int -> int -> fragment -> fragment
-  val read_fixext4 : int -> int32 -> fragment -> fragment
-  val read_fixext8 : int -> int64 -> fragment -> fragment
-  val read_fixext16 : int -> int64 -> int64 -> fragment -> fragment
+  val read_fixext1 : int -> int -> bytes -> fragment -> fragment
+  val read_fixext2 : int -> int -> bytes -> fragment -> fragment
+  val read_fixext4 : int -> int32 -> bytes -> fragment -> fragment
+  val read_fixext8 : int -> int64 -> bytes -> fragment -> fragment
+  val read_fixext16 : int -> int64 -> int64 -> bytes -> fragment -> fragment
   val read_ext8 : int -> bytes -> int -> int -> fragment -> fragment
   val read_ext16 : int -> bytes -> int -> int -> fragment -> fragment
   val read_ext32 : int -> bytes -> int -> int -> fragment -> fragment
@@ -108,9 +108,11 @@ module type MESSAGE_COMPOSER = sig
   val write_fixext4 : int -> int32 -> fragment -> fragment
   val write_fixext8 : int -> int64 -> fragment -> fragment
   val write_fixext16 : int -> int64 -> int64 -> fragment -> fragment
+  val write_fixext : int -> string -> fragment -> fragment
   val write_ext8 : int -> string -> int -> int -> fragment -> fragment
   val write_ext16 : int -> string -> int -> int -> fragment -> fragment
   val write_ext32 : int -> string -> int -> int -> fragment -> fragment
+  val write_ext_best : int -> string -> int -> int -> fragment -> fragment
 
 end
 

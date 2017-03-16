@@ -178,19 +178,19 @@ module Safe = struct
     let read_map32_next = read_fixmap_next
     let read_map32_end = read_fixmap_end
 
-    let read_fixext1 t n frag =
+    let read_fixext1 t n _ frag =
       raise(Cannot_represent "fixext1")
 
-    let read_fixext2 t n frag =
+    let read_fixext2 t n _ frag =
       raise(Cannot_represent "fixext2")
 
-    let read_fixext4 t n frag =
+    let read_fixext4 t n _ frag =
       raise(Cannot_represent "fixext4")
 
-    let read_fixext8 t n frag =
+    let read_fixext8 t n _ frag =
       raise(Cannot_represent "fixext8")
 
-    let read_fixext16 t n1 n2 frag =
+    let read_fixext16 t n1 n2 _ rag =
       raise(Cannot_represent "fixext16")
 
     let read_ext8 t by pos len frag =

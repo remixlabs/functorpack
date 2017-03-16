@@ -169,24 +169,24 @@ module Make(X : Types.MESSAGE_EXTRACTOR) = struct
       | '\xd4' ->
           let t = read_uint8 by pos endpos in
           let n = read_uint8 by pos endpos in
-          X.read_fixext1 t n frag
+          X.read_fixext1 t n (Bytes.sub by !pos 1) frag
       | '\xd5' ->
           let t = read_uint8 by pos endpos in
           let n = read_uint16 by pos endpos in
-          X.read_fixext2 t n frag
+          X.read_fixext2 t n (Bytes.sub by !pos 2) frag
       | '\xd6' ->
           let t = read_uint8 by pos endpos in
           let n = read_int32 by pos endpos in
-          X.read_fixext4 t n frag
+          X.read_fixext4 t n (Bytes.sub by !pos 4) frag
       | '\xd7' ->
           let t = read_uint8 by pos endpos in
           let n = read_int64 by pos endpos in
-          X.read_fixext8 t n frag
+          X.read_fixext8 t n (Bytes.sub by !pos 8) frag
       | '\xd8' ->
           let t = read_uint8 by pos endpos in
           let n1 = read_int64 by pos endpos in
           let n2 = read_int64 by pos endpos in
-          X.read_fixext16 t n1 n2 frag
+          X.read_fixext16 t n1 n2 (Bytes.sub by !pos 16) frag
       | '\xc7' ->
           let n = read_uint8 by pos endpos in
           let t = read_uint8 by pos endpos in
