@@ -10,8 +10,35 @@ include _oasis_hier.om
 # local phonies
 .PHONY: build-here doc-here install-here uninstall-here reinstall-here pre-install-here clean-here distclean-here
 
+# there is a bug in the released version of oasis (0.4.8), preventing the
+# correct installation of packed libraries. Work around that:
+# <begin of workaround part1>
+SKIP_INSTALL_FPack = true
+files[] =
+    META
+    $(OASIS_expand_module_files_OCamlLibrary FPack)
+    $(OASIS_expand_library_files_OCamlLibrary FPack)
+optional_files[] =
+    $(OASIS_expand_optional_module_files_OCamlLibrary FPack)
+    $(OASIS_expand_optional_library_files_OCamlLibrary FPack)
+OASIS_install_OCamlLibrary(FPack, functorpack, functorpack, $(files), $(optional_files))
+OASIS_uninstall_OCamlLibrary(FPack, functorpack, functorpack)
+OASIS_reinstall_OCamlLibrary(FPack, functorpack, functorpack, $(files), $(optional_files))
+OASIS_uninstall_data_OCamlLibrary(FPack)
+# <end of workaround part1>
+
 include _oasis_build.om
 include _oasis_install.om
+
+# <begin of workaround part2>
+INSTALL_TARGETS[] +=
+    $(OASIS_installtarget_OCamlLibrary FPack)
+UNINSTALL_TARGETS[] +=
+    $(OASIS_uninstalltarget_OCamlLibrary FPack)
+REINSTALL_TARGETS[] +=
+    $(OASIS_reinstalltarget_OCamlLibrary FPack)
+# <end of workaround part2>
+
 
 DefineBuildRules()
 DefineInstallRules()
