@@ -9,7 +9,7 @@ section
         export SKIP_INSTALL_FPack
     if $(not $(SKIP_INSTALL_FPack))
         NAME = $"FPack"
-        FINDLIB_NAME = $"FPack"
+        FINDLIB_NAME = $"functorpack"
         FINDLIB_PARENT = $(FINDLIB_NAME)
         INSTALL_MODULES[] =
             $"modules/Types"

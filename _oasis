@@ -18,6 +18,7 @@ Library FPack
                      modules/Figly
   Path:              src/functorpack
   Install:           true
+  FindlibName:       functorpack
 
 Library testing
   Modules:      T_frame
@@ -28,6 +29,6 @@ Library testing
 Executable unittests
   Path:         progs
   MainIs:       Unittests.ml
-  BuildDepends: FPack, testing
+  BuildDepends: functorpack, testing
   Install:      false
   
