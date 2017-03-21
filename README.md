@@ -12,6 +12,7 @@ You need:
 
  - `ocaml setup.ml -configure`
  - `omake`
+ - `progs/unittests`  (optional)
  - `omake install`
 
 ## Documentation
