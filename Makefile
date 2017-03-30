@@ -18,7 +18,7 @@ clean:
 	rm -f setup.data
 	rm -f .omakedb
 
-ios-install: ios-install.i386 ios-install.amd64 ios-install.arm32 ios-install.arm64
+ios-install: ios-install.x86 ios-install.amd64 ios-install.arm32 ios-install.arm64
 
 ios-install.%:
 	set -e; \
