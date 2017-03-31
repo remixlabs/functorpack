@@ -32,6 +32,29 @@ module Data : DATA = struct
 end
 
 
+let decode_tagged_string by pos len =
+  if len = 0 || Bytes.get by pos <> '{' then
+    None
+  else
+    match Bytes.index_from by (pos+1) '}' with
+      | i ->
+          if i >= pos+len then
+            failwith "FPack.Figly.decompose_tagged_string";
+          let tag = Bytes.sub_string by (pos+1) (i-pos-1) in
+          Some(tag,i+1,pos+len-i-1)
+      | exception Not_found ->
+          failwith "FPack.Figly.decompose_tagged_string"
+
+let encode_tagged_string_str s =
+  if String.length s > 0 && s.[0] = '{' then
+    "{str}" ^ s
+  else
+    s
+
+let encode_tagged_string_ref id =
+  "{ref}" ^ id
+
+
 module Make(D:DATA) = struct
   open D
 
@@ -83,7 +106,16 @@ module Make(D:DATA) = struct
     let read_float64 = read_float32
 
     let read_fixstr by pos len frag =
-      Dstring (Bytes.sub_string by pos len) :: frag
+      match decode_tagged_string by pos len with
+        | None ->
+            Dstring (Bytes.sub_string by pos len) :: frag
+        | Some("str", p, l) ->
+            Dstring (Bytes.sub_string by p l) :: frag
+        | Some("ref", p, l) ->
+            let id = Bytes.sub_string by p l in
+            Dref id :: frag
+        | Some(tag,_,_) ->
+            raise(Cannot_represent ("unknown string tag: " ^ tag))
 
     let read_str8 = read_fixstr
     let read_str16 = read_fixstr
@@ -145,14 +177,7 @@ module Make(D:DATA) = struct
     let read_map32_end = read_fixmap_end
 
     let read_ext8 t b pos len frag =
-      if t = 0x22 then
-        match Eb.extract_bytes b pos len with
-          | Dstring s ->
-              Dref s :: frag
-          | _ ->
-              raise(Cannot_represent "found Ref with non-string content")
-      else
-        raise(Cannot_represent "unknown extension")
+      raise(Cannot_represent "unknown extension")
 
     let read_ext16 = read_ext8
     let read_ext32 = read_ext8
@@ -189,6 +214,7 @@ module Make(D:DATA) = struct
           | Dfloat x ->
               C.write_float64 x frag
           | Dstring s ->
+              let s = encode_tagged_string_str s in
               C.write_str_best s 0 (String.length s) frag
           | Dbinary s ->
               C.write_bin_best s 0 (String.length s) frag
@@ -214,12 +240,8 @@ module Make(D:DATA) = struct
                   (0,frag) in
               f_end n frag
           | Dref id ->
-              let ifrag = Composer.Bytes.create() in
-              let ifrag =
-                Composer.Bytes.write_str_best id 0 (String.length id) ifrag in
-              let bytes = Composer.Bytes.compose ifrag in
-              let str = Bytes.to_string bytes in
-              C.write_ext_best 0x22 str 0 (String.length str) frag
+              let s = encode_tagged_string_ref id in
+              C.write_str_best s 0 (String.length s) frag
       in
       C.compose (recurse (C.create()) j)
   end
