@@ -22,11 +22,11 @@ ios-install: ios-install.x86 ios-install.amd64 ios-install.arm32 ios-install.arm
 
 ios-install.%:
 	set -e; \
+	eval `opam config env --switch=$(OCAML_VERSION)+ios+$*`; \
 	{ [ ! -f .omakedb ] || omake clean; }; \
 	find . -name "*.omc" | xargs rm; \
 	rm -f setup.data; \
 	rm -f .omakedb; \
-	eval `opam config env --switch=$(OCAML_VERSION)+ios+$*`; \
-	ocaml setup.ml -configure; \
+	OCAMLFIND_TOOLCHAIN=ios ocaml setup.ml -configure; \
 	OCAMLFIND_TOOLCHAIN=ios omake CMXS_ENABLED=false; \
 	OCAMLFIND_TOOLCHAIN=ios omake CMXS_ENABLED=false reinstall
