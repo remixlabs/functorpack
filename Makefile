@@ -1,4 +1,4 @@
-.PHONY: all install clean ios-install
+.PHONY: all test install clean ios-install
 
 OCAML_VERSION ?= 4.04.0
 # only for ios
@@ -8,6 +8,9 @@ all: setup.data
 
 setup.data:
 	ocaml setup.ml -configure
+
+test:
+	./progs/unittests
 
 install:
 	omake reinstall
