@@ -116,6 +116,7 @@ module Types : sig
     val write_ext32 : int -> string -> int -> int -> fragment -> fragment
     val write_ext_best : int -> string -> int -> int -> fragment -> fragment
 
+    val write_message : message -> fragment -> fragment
   end
 
 end

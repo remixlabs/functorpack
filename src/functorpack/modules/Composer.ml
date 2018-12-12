@@ -399,6 +399,10 @@ module Bytes = struct
       else
         write_ext32 t s pos len buf
 
+  let write_message msg buf =
+    Buffer.add_bytes buf msg;
+    buf
+
 end
 
 module Checker(C : Types.MESSAGE_COMPOSER) = struct
@@ -494,6 +498,7 @@ module Checker(C : Types.MESSAGE_COMPOSER) = struct
   let write_ext32 t s p l (frag,cl) = (C.write_ext32 t s p l frag, record cl)
   let write_ext_best t s p l (frag,cl) = (C.write_ext_best t s p l frag,
                                           record cl)
+  let write_message msg (frag,cl) = (C.write_message msg frag, record cl)
 
   let write_fixarray_start n (frag,cl) =
     (C.write_fixarray_start n frag,
