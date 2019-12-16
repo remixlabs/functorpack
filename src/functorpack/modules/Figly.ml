@@ -39,11 +39,12 @@ let decode_tagged_string by pos len =
     match Bytes.index_from by (pos+1) '}' with
       | i ->
           if i >= pos+len then
-            failwith "FPack.Figly.decompose_tagged_string";
-          let tag = Bytes.sub_string by (pos+1) (i-pos-1) in
-          Some(tag,i+1,pos+len-i-1)
+            None
+          else
+            let tag = Bytes.sub_string by (pos+1) (i-pos-1) in
+            Some(tag,i+1,pos+len-i-1)
       | exception Not_found ->
-          failwith "FPack.Figly.decompose_tagged_string"
+          None
 
 let encode_tagged_string_str s =
   if String.length s > 0 && s.[0] = '{' then
