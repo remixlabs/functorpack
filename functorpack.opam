@@ -1,8 +1,18 @@
 opam-version: "2.0"
+
 name: "functorpack"
+synopsis: "MessagePack for OCaml"
+
+authors: "Remix Labs"
+maintainer: "Remix Labs"
+
+homepage: "https://github.com/remixlabs/functorpack"
+bug-reports: "https://github.com/remixlabs/functorpack/issues"
+
 depends: [
   "omake" {build}
 ]
+
 build: [
   [make]
   [make "test"] {with-test}
