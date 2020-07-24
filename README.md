@@ -5,7 +5,7 @@ MessagePack for OCaml
 ## Prerequisites
 
 You need:
- - ocaml 4.04.0
+ - ocaml
  - omake
 
 ## Build
