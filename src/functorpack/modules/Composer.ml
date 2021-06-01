@@ -128,7 +128,7 @@ module Bytes = struct
         write_fixnum (Int64.to_int n) buf
       else if n <= 32767L then
         write_int16 (Int64.to_int n) buf
-      else if Sys.word_size=32 || n <= Int64.of_int32 Int32.max_int then
+      else if n <= Int64.of_int32 Int32.max_int then
         write_int32 (Int64.to_int32 n) buf
       else
         write_int64 n buf
@@ -138,7 +138,7 @@ module Bytes = struct
         write_fixnum (Int64.to_int n) buf
       else if n >= (-32768L) then
         write_int16 (Int64.to_int n) buf
-      else if Sys.word_size=32 || n >= Int64.of_int32 Int32.min_int then
+      else if n >= Int64.of_int32 Int32.min_int then
         write_int32 (Int64.to_int32 n) buf
       else
         write_int64 n buf
