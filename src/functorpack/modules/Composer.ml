@@ -19,13 +19,13 @@ module Bytes = struct
   let write_fixnum n buf =
     if n < (-32) || n > 127 then raise Error;
     if n >= 0 then
-      Buffer.add_char buf (Char.chr (n land 0x7f))
+      Buffer.add_char buf (Char.unsafe_chr (n land 0x7f))
     else
-      Buffer.add_char buf (Char.chr (0xe0 + n land 0x1f));
+      Buffer.add_char buf (Char.unsafe_chr (0xe0 + n land 0x1f));
     buf
 
   let add_uint8 buf n =
-    Buffer.add_char buf (Char.chr (n land 0xff))
+    Buffer.add_char buf (Char.unsafe_chr (n land 0xff))
 
   let add_uint16 buf n =
     add_uint8 buf (n lsr 8);
@@ -128,7 +128,7 @@ module Bytes = struct
         write_fixnum (Int64.to_int n) buf
       else if n <= 32767L then
         write_int16 (Int64.to_int n) buf
-      else if Sys.word_size=32 || n <= Int64.of_int32 Int32.max_int then
+      else if n <= Int64.of_int32 Int32.max_int then
         write_int32 (Int64.to_int32 n) buf
       else
         write_int64 n buf
@@ -138,7 +138,7 @@ module Bytes = struct
         write_fixnum (Int64.to_int n) buf
       else if n >= (-32768L) then
         write_int16 (Int64.to_int n) buf
-      else if Sys.word_size=32 || n >= Int64.of_int32 Int32.min_int then
+      else if n >= Int64.of_int32 Int32.min_int then
         write_int32 (Int64.to_int32 n) buf
       else
         write_int64 n buf
@@ -158,7 +158,7 @@ module Bytes = struct
     if pos < 0 || len < 0 || pos > String.length s - len then
       invalid_arg "FPack.Composer.Bytes.write_fixstr";
     if len > 31 then raise Error;
-    Buffer.add_char buf (Char.chr (0xa0 + len));
+    Buffer.add_char buf (Char.unsafe_chr (0xa0 + len));
     Buffer.add_substring buf s pos len;
     buf
 
@@ -240,7 +240,7 @@ module Bytes = struct
 
   let write_fixarray_start n buf =
     if n < 0 || n > 15 then raise Error;
-    Buffer.add_char buf (Char.chr (0x90 + n));
+    Buffer.add_char buf (Char.unsafe_chr (0x90 + n));
     buf
 
   let write_fixarray_end n buf = buf
@@ -271,7 +271,7 @@ module Bytes = struct
 
   let write_fixmap_start n buf =
     if n < 0 || n > 15 then raise Error;
-    Buffer.add_char buf (Char.chr (0x80 + n));
+    Buffer.add_char buf (Char.unsafe_chr (0x80 + n));
     buf
 
   let write_fixmap_next buf = buf
