@@ -83,6 +83,8 @@ module Types : sig
     val write_bin16 : string -> int -> int -> fragment -> fragment
     val write_bin32 : string -> int -> int -> fragment -> fragment
     val write_bin_best : string -> int -> int -> fragment -> fragment
+    val write_bin32_rope : Rope.t -> int -> int -> fragment -> fragment
+    val write_bin_best_rope : Rope.t -> int -> int -> fragment -> fragment
     val write_fixarray_start : int -> fragment -> fragment
     val write_fixarray_end : int -> fragment -> fragment
     val write_array16_start : int -> fragment -> fragment
@@ -173,65 +175,3 @@ module Yojson : sig
     val compose_rope : json -> Rope.t
   end
 end
-
-module Figly : sig
-  exception Cannot_represent of string
-  module type DATA = sig
-    (** Maps from string to anything *)
-    module SMap : Map.S with type key = string
-
-    type data =
-      | Dnull                (** null *)
-      | Dbool of bool        (** true or false *)
-      | Dint of int64        (** integers *)
-      | Dfloat of float      (** floating-points numbers *)
-      | Dstring of string    (** strings *)
-      | Dbinary of string    (** binary data *)
-      | Dobject of data SMap.t   (** objects are mappings from strings to data *)
-      | Darray of data array     (** arrays of data *)
-      | Dref of string           (** Ref to this ID *)
-
-  end
-
-
-  (** Use it like:
-
-      {[ module F = FPack.Figly.Make(FPack.Figly.Data) ]}
-
-      then call [F.extract_byte] and [F.compose_bytes].
-   *)
-  module Make(D : DATA) : sig
-    val extract_bytes : bytes -> int -> int -> D.data
-    val extract_string : string -> int -> int -> D.data
-    val extract_rope : Rope.t -> int -> int -> D.data
-    val compose_bytes : D.data -> bytes
-    val compose_rope : D.data -> Rope.t
-  end
-
-  module Data : DATA
-    (** This is just a sample implementation. Feel free to use anything
-        else that also defines the same [data] type.
-     *)
-
-  val decode_tagged_string : bytes -> int -> int ->
-                             (string * int * int) option
-    (** [decode_tagged_string bytes pos len]:
-        Decodes a string that optionally uses the "{tag}" prefix.
-        Returns [None] when there is no such prefix.
-        Returns [Some(tag,p,l)[ when the prefix with [tag] is found,
-        and the payload starts at byte [p] and the length is [l].
-        Raises [Cannot_represent] if there is a left brace but not a right
-        brace.
-     *)
-
-  val encode_tagged_string_str : string -> string
-    (** Checks whether this string needs the "{str}" prefix and
-        prepends it if necessary.
-     *)
-
-  val encode_tagged_string_ref : string -> string
-    (** Encodes a ref to the passed ID as tagged string *)
-
-end
-
-

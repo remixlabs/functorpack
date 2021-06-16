@@ -12,6 +12,7 @@ module type WRITER = sig
   val add_int64 : buffer -> int64 -> unit
   val add_size32 : buffer -> int -> unit
   val add_substring : buffer -> string -> int -> int -> unit
+  val add_subrope : buffer -> Rope.t -> int -> int -> unit
   val add_message : buffer -> message -> unit
 end
 
@@ -58,6 +59,10 @@ module Bytes_writer = struct
   let add_substring =
     Buffer.add_substring
 
+  let add_subrope buf rope p len =
+    let srope = Rope.sub rope p len in
+    Buffer.add_string buf (Rope.to_string srope)
+
   let add_message =
     Buffer.add_bytes
 end
@@ -75,12 +80,22 @@ module Rope_writer = struct
     Rope.Buffer.add_char buf (Char.unsafe_chr (n land 0xff))
 
   let add_int16 buf n =
-    add_int8 buf (n lsr 8);
-    add_int8 buf n
+    let by = Bytes.create 2 in
+    Bytes.set by 0 (Char.unsafe_chr ((n lsr 8) land 0xff));
+    Bytes.set by 1 (Char.unsafe_chr (n land 0xff));
+    Rope.Buffer.add_string buf (Bytes.unsafe_to_string by)
 
   let add_int32 buf n =
-    add_int16 buf (Int32.to_int (Int32.shift_right_logical n 16));
-    add_int16 buf (Int32.to_int n)
+    let by = Bytes.create 4 in
+    let k0 = Int32.shift_right_logical n 24 |> Int32.to_int in
+    let k1 = Int32.shift_right_logical n 16 |> Int32.to_int in
+    let k2 = Int32.shift_right_logical n 8 |> Int32.to_int in
+    let k3 = Int32.to_int n in
+    Bytes.set by 0 (Char.unsafe_chr (k0 land 0xff));
+    Bytes.set by 1 (Char.unsafe_chr (k1 land 0xff));
+    Bytes.set by 2 (Char.unsafe_chr (k2 land 0xff));
+    Bytes.set by 3 (Char.unsafe_chr (k3 land 0xff));
+    Rope.Buffer.add_string buf (Bytes.unsafe_to_string by)
 
   let add_int64 buf n =
     add_int32 buf (Int64.to_int32 (Int64.shift_right n 32));
@@ -91,6 +106,10 @@ module Rope_writer = struct
 
   let add_substring =
     Rope.Buffer.add_substring
+
+  let add_subrope buf rope p len =
+    let srope = Rope.sub rope p len in
+    Rope.Buffer.add_rope buf srope
 
   let add_message =
     Rope.Buffer.add_rope
@@ -290,6 +309,14 @@ module Serialize(W : WRITER) = struct
     W.add_substring buf s pos len;
     buf
 
+  let write_bin32_rope s pos len buf =
+    if pos < 0 || len < 0 || pos > Rope.length s - len then
+      invalid_arg "FPack.Composer.Bytes.write_bin32_rope";
+    W.add_char buf '\xc6';
+    W.add_size32 buf len;
+    W.add_subrope buf s pos len;
+    buf
+
   let write_bin_best s pos n buf =
     if n <= 255 then
       write_bin8 s pos n buf
@@ -299,6 +326,17 @@ module Serialize(W : WRITER) = struct
       if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
         raise Error;
       write_bin32 s pos n buf
+    )
+
+  let write_bin_best_rope s pos n buf =
+    if n <= 255 then
+      write_bin8 (Rope.to_string s) pos n buf
+    else if n <= 65536 then
+      write_bin16 (Rope.to_string s) pos n buf
+    else (
+      if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
+        raise Error;
+      write_bin32_rope s pos n buf
     )
 
   let write_fixarray_start n buf =
@@ -552,6 +590,8 @@ module Checker(C : Types.MESSAGE_COMPOSER) = struct
   let write_bin16 s p l (frag,cl) = (C.write_bin16 s p l frag, record cl)
   let write_bin32 s p l (frag,cl) = (C.write_bin32 s p l frag, record cl)
   let write_bin_best s p l (frag,cl) = (C.write_bin_best s p l frag, record cl)
+  let write_bin32_rope s p l (frag,cl) = (C.write_bin32_rope s p l frag, record cl)
+  let write_bin_best_rope s p l (frag,cl) = (C.write_bin_best_rope s p l frag, record cl)
   let write_fixext1 t n (frag,cl) = (C.write_fixext1 t n frag, record cl)
   let write_fixext2 t n (frag,cl) = (C.write_fixext2 t n frag, record cl)
   let write_fixext4 t n (frag,cl) = (C.write_fixext4 t n frag, record cl)
