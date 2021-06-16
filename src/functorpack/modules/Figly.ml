@@ -59,12 +59,7 @@ let encode_tagged_string_ref id =
 module Make(D:DATA) = struct
   open D
 
-  module type EB = sig
-    val extract_bytes : bytes -> int -> int -> data
-  end
-
-
-  module rec Extractor : Types.MESSAGE_EXTRACTOR = struct
+  module Extractor = struct
     type message = data
     type fragment = data list  (* a stack in reverse order *)
 
@@ -194,13 +189,17 @@ module Make(D:DATA) = struct
       read_ext8 t b 0 (Bytes.length b) frag
   end
 
-  and Eb : EB = struct
-    let extract_bytes by pos len =
-      let module E = Extract.Make(Extractor) in
-      E.extract_bytes by pos len
-  end
+  let extract_bytes by pos len =
+    let module E = Extract.Make(Extractor) in
+    E.extract_bytes by pos len
 
-  let extract_bytes = Eb.extract_bytes
+  let extract_string by pos len =
+    let module E = Extract.Make(Extractor) in
+    E.extract_string by pos len
+
+  let extract_rope by pos len =
+    let module E = Extract.Make(Extractor) in
+    E.extract_rope by pos len
 
   module Compose(C : Types.MESSAGE_COMPOSER) = struct
     let compose j =
@@ -249,6 +248,11 @@ module Make(D:DATA) = struct
 
   let compose_bytes json =
     let module C = Composer.Checker(Composer.Bytes) in
+    let module P = Compose(C) in
+    P.compose json
+
+  let compose_rope json =
+    let module C = Composer.Checker(Composer.Rope) in
     let module P = Compose(C) in
     P.compose json
 

@@ -12,11 +12,7 @@ section
         FINDLIB_NAME = $"functorpack"
         FINDLIB_PARENT = $(FINDLIB_NAME)
         INSTALL_MODULES[] =
-            $"modules/Types"
-            $"modules/Extract"
-            $"modules/Composer"
-            $"modules/Yojson"
-            $"modules/Figly"
+            $(NAME)
             $(OASIS_getvar EXTRA_INSTALL_MODULES)
         INSTALL_FILES[] =
             $"META"

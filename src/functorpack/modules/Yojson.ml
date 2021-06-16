@@ -208,6 +208,14 @@ module Safe = struct
     let module E = Extract.Make(Extractor) in
     E.extract_bytes by pos len
 
+  let extract_string by pos len =
+    let module E = Extract.Make(Extractor) in
+    E.extract_string by pos len
+
+  let extract_rope by pos len =
+    let module E = Extract.Make(Extractor) in
+    E.extract_rope by pos len
+
   module Compose(C : Types.MESSAGE_COMPOSER) = struct
     let compose j =
       let rec recurse frag j =
@@ -262,6 +270,11 @@ module Safe = struct
 
   let compose_bytes json =
     let module C = Composer.Checker(Composer.Bytes) in
+    let module P = Compose(C) in
+    P.compose json
+
+  let compose_rope json =
+    let module C = Composer.Checker(Composer.Rope) in
     let module P = Compose(C) in
     P.compose json
 

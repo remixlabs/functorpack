@@ -125,13 +125,16 @@ end
 module Extract : sig
   exception Error
   module Make(X : Types.MESSAGE_EXTRACTOR) : sig
+    val extract_string : string -> int -> int -> X.message
     val extract_bytes : bytes -> int -> int -> X.message
+    val extract_rope : Rope.t -> int -> int -> X.message
   end
 end
 
 module Composer : sig
   exception Error
   module Bytes : Types.MESSAGE_COMPOSER with type message = bytes
+  module Rope : Types.MESSAGE_COMPOSER with type message = Rope.t
   module Checker(C : Types.MESSAGE_COMPOSER) :
            Types.MESSAGE_COMPOSER with type message = C.message
 end
@@ -160,11 +163,14 @@ module Yojson : sig
                        and type fragment = json list
 
     val extract_bytes : bytes -> int -> int -> json
+    val extract_string : string -> int -> int -> json
+    val extract_rope : Rope.t -> int -> int -> json
     module Compose(C : Types.MESSAGE_COMPOSER) : sig
       val compose : json -> C.message
     end
 
     val compose_bytes : json -> bytes
+    val compose_rope : json -> Rope.t
   end
 end
 
@@ -196,7 +202,10 @@ module Figly : sig
    *)
   module Make(D : DATA) : sig
     val extract_bytes : bytes -> int -> int -> D.data
+    val extract_string : string -> int -> int -> D.data
+    val extract_rope : Rope.t -> int -> int -> D.data
     val compose_bytes : D.data -> bytes
+    val compose_rope : D.data -> Rope.t
   end
 
   module Data : DATA

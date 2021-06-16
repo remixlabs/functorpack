@@ -12,11 +12,12 @@ section
         NATIVE_ENABLED = $"false"
         MAIN_MODULE = $"Unittests"
         OCAMLPACKS[] =
+            $"rope"
             $"str"
             $(OASIS_getvar EXTRA_OCAMLPACKS)
         OCAML_LIBS[] =
-            $"../src/functorpack/FPack"
             $"../src/testing/testing"
+            $"../src/functorpack/FPack"
             $(OASIS_getvar EXTRA_OCAML_LIBS)
         C_SOURCES[] =
         C_OBJECTS = $(replacesuffixes .c, $(EXT_OBJ), $(C_SOURCES))

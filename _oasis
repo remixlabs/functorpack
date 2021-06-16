@@ -18,6 +18,7 @@ Library FPack
                      modules/Figly
   Path:              src/functorpack
   Install:           true
+  BuildDepends:      rope
   FindlibName:       functorpack
 
 Library testing

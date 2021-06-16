@@ -15,6 +15,7 @@ if true
 OCAMLINCLUDES[] +=
     $(OASIS_getvar_for FPack, EXTRA_OCAMLINCLUDES)
 OCAMLPACKS[] +=
+    $"rope"
     $(OASIS_getvar_for FPack, EXTRA_OCAMLPACKS)
 OCAMLOPTFLAGS[] +=
     -for-pack
