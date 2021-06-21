@@ -14,10 +14,10 @@ Library FPack
   Modules:           modules/Types,
                      modules/Extract,
                      modules/Composer,
-                     modules/Yojson,
-                     modules/Figly
+                     modules/Yojson
   Path:              src/functorpack
   Install:           true
+  BuildDepends:      rope
   FindlibName:       functorpack
 
 Library testing
