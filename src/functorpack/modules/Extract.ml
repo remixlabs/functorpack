@@ -389,7 +389,7 @@ module MakeForReader(X : Types.MESSAGE_EXTRACTOR)(R : READER) = struct
 
   and extract by pos len =
     if len < 0 || pos < 0 || pos > R.length by - len then
-      invalid_arg "FPack.Extract.Make.extract_bytes";
+      invalid_arg "FPack.Extract.Make.extract";
     let frag = X.create() in
     let rpos = R.move by pos in
     let endpos = pos + len in

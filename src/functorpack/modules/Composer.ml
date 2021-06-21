@@ -238,7 +238,7 @@ module Serialize(W : WRITER) = struct
 
   let write_fixstr s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_fixstr";
+      invalid_arg "FPack.Composer.Serialize.write_fixstr";
     if len > 31 then raise Error;
     W.add_char buf (Char.unsafe_chr (0xa0 + len));
     W.add_substring buf s pos len;
@@ -246,7 +246,7 @@ module Serialize(W : WRITER) = struct
 
   let write_str8 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_str8";
+      invalid_arg "FPack.Composer.Serialize.write_str8";
     if len > 255 then raise Error;
     W.add_char buf '\xd9';
     W.add_int8 buf len;
@@ -255,7 +255,7 @@ module Serialize(W : WRITER) = struct
 
   let write_str16 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_str16";
+      invalid_arg "FPack.Composer.Serialize.write_str16";
     if len > 65535 then raise Error;
     W.add_char buf '\xda';
     W.add_int16 buf len;
@@ -264,7 +264,7 @@ module Serialize(W : WRITER) = struct
 
   let write_str32 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_str32";
+      invalid_arg "FPack.Composer.Serialize.write_str32";
     W.add_char buf '\xdb';
     W.add_size32 buf len;
     W.add_substring buf s pos len;
@@ -285,7 +285,7 @@ module Serialize(W : WRITER) = struct
 
   let write_bin8 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_bin8";
+      invalid_arg "FPack.Composer.Serialize.write_bin8";
     if len > 255 then raise Error;
     W.add_char buf '\xc4';
     W.add_int8 buf len;
@@ -294,7 +294,7 @@ module Serialize(W : WRITER) = struct
 
   let write_bin16 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_bin16";
+      invalid_arg "FPack.Composer.Serialize.write_bin16";
     if len > 65535 then raise Error;
     W.add_char buf '\xc5';
     W.add_int16 buf len;
@@ -303,7 +303,7 @@ module Serialize(W : WRITER) = struct
 
   let write_bin32 s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_bin32";
+      invalid_arg "FPack.Composer.Serialize.write_bin32";
     W.add_char buf '\xc6';
     W.add_size32 buf len;
     W.add_substring buf s pos len;
@@ -311,7 +311,7 @@ module Serialize(W : WRITER) = struct
 
   let write_bin32_rope s pos len buf =
     if pos < 0 || len < 0 || pos > Rope.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_bin32_rope";
+      invalid_arg "FPack.Composer.Serialize.write_bin32_rope";
     W.add_char buf '\xc6';
     W.add_size32 buf len;
     W.add_subrope buf s pos len;
@@ -450,7 +450,7 @@ module Serialize(W : WRITER) = struct
         | 4 -> '\xd6'
         | 8 -> '\xd7'
         | 16 -> '\xd8'
-        | _ -> invalid_arg "FPack.Compose.Bytes.write_fixext: bad length" in
+        | _ -> invalid_arg "FPack.Compose.Serialize.write_fixext: bad length" in
     W.add_char buf tag;
     W.add_int8 buf t;
     W.add_substring buf str 0 (String.length str);
@@ -458,7 +458,7 @@ module Serialize(W : WRITER) = struct
 
   let write_ext8 t s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_ext8";
+      invalid_arg "FPack.Composer.Serialize.write_ext8";
     if t < 0 || t > 255 || len > 255 then raise Error;
     W.add_char buf '\xc7';
     W.add_int8 buf len;
@@ -468,7 +468,7 @@ module Serialize(W : WRITER) = struct
 
   let write_ext16 t s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_ext16";
+      invalid_arg "FPack.Composer.Serialize.write_ext16";
     if t < 0 || t > 255 || len > 65535 then raise Error;
     W.add_char buf '\xc8';
     W.add_int16 buf len;
@@ -478,7 +478,7 @@ module Serialize(W : WRITER) = struct
 
   let write_ext32 t s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_ext32";
+      invalid_arg "FPack.Composer.Serialize.write_ext32";
     if t < 0 || t > 255 then raise Error;
     W.add_char buf '\xc9';
     W.add_size32 buf len;
@@ -488,7 +488,7 @@ module Serialize(W : WRITER) = struct
 
   let write_ext_best t s pos len buf =
     if pos < 0 || len < 0 || pos > String.length s - len then
-      invalid_arg "FPack.Composer.Bytes.write_ext_best";
+      invalid_arg "FPack.Composer.Serialize.write_ext_best";
     if t < 0 || t > 255 then raise Error;
     if len=1 || len=2 || len=4 || len=8 || len=16 then
       write_fixext t (String.sub s pos len) buf
