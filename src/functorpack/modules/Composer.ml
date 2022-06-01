@@ -275,7 +275,7 @@ module Serialize(W : WRITER) = struct
       write_fixstr s pos n buf
     else if n <= 255 then
       write_str8 s pos n buf
-    else if n <= 65536 then
+    else if n <= 65535 then
       write_str16 s pos n buf
     else (
       if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
@@ -320,7 +320,7 @@ module Serialize(W : WRITER) = struct
   let write_bin_best s pos n buf =
     if n <= 255 then
       write_bin8 s pos n buf
-    else if n <= 65536 then
+    else if n <= 65535 then
       write_bin16 s pos n buf
     else (
       if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
@@ -331,7 +331,7 @@ module Serialize(W : WRITER) = struct
   let write_bin_best_rope s pos n buf =
     if n <= 255 then
       write_bin8 (Rope.to_string s) pos n buf
-    else if n <= 65536 then
+    else if n <= 65535 then
       write_bin16 (Rope.to_string s) pos n buf
     else (
       if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
@@ -495,7 +495,7 @@ module Serialize(W : WRITER) = struct
     else
       if len <= 255 then
         write_ext8 t s pos len buf
-      else if len <= 65536 then
+      else if len <= 65535 then
         write_ext16 t s pos len buf
       else
         write_ext32 t s pos len buf
