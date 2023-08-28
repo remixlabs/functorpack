@@ -1,16 +1,12 @@
-checkout:
-  post:
-    - cd $HOME && git clone git@github.com:figly/ocaml-scripts
+version: 2.1
 
-dependencies:
-  cache_directories:
-    - ~/.opam
-  override:
-    - cd $HOME/ocaml-scripts && ./bin/install-ocaml --force
-    - eval $(opam config env) && make setup.data
-
-test:
-  override:
-    - eval $(opam config env) && make
-    - eval $(opam config env) && make test
-
+jobs:
+  build:
+    docker:
+      - image: public.ecr.aws/l8e3r2a5/rmx-ci-standard:latest
+    steps:
+      - checkout
+      - run: cd $HOME && git clone git@github.com:figly/ocaml-scripts
+      - run: eval $(opam config env) && make setup.data
+      - run: eval $(opam config env) && make
+      - run: eval $(opam config env) && make test
