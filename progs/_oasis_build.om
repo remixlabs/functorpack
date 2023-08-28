@@ -14,6 +14,7 @@ section
         OCAMLPACKS[] =
             $"rope"
             $"str"
+            $"rope"
             $(OASIS_getvar EXTRA_OCAMLPACKS)
         OCAML_LIBS[] =
             $"../src/testing/testing"
@@ -86,6 +87,7 @@ OCAMLINCLUDES[] +=
     $"../src/testing"
     $(OASIS_getvar_for unittests, EXTRA_OCAMLINCLUDES)
 OCAMLPACKS[] +=
+    $"rope"
     $(OASIS_getvar_for unittests, EXTRA_OCAMLPACKS)
 if $(ENABLE_SYNTAX_CAMLP4O)
     OCAMLFINDFLAGS += -syntax camlp4o
