@@ -1,3 +1,6 @@
+type bigstring =
+  (char,Bigarray.int8_unsigned_elt,Bigarray.c_layout) Bigarray.Array1.t
+
 module type MESSAGE_EXTRACTOR = sig
   type message
   type fragment
@@ -83,6 +86,8 @@ module type MESSAGE_COMPOSER = sig
   val write_bin_best : string -> int -> int -> fragment -> fragment
   val write_bin32_rope : Rope.t -> int -> int -> fragment -> fragment
   val write_bin_best_rope : Rope.t -> int -> int -> fragment -> fragment
+  val write_bin32_big : bigstring -> int -> int -> fragment -> fragment
+  val write_bin_best_big : bigstring -> int -> int -> fragment -> fragment
   val write_fixarray_start : int -> fragment -> fragment
   val write_fixarray_end : int -> fragment -> fragment
   val write_array16_start : int -> fragment -> fragment

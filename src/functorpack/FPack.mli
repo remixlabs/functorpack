@@ -1,5 +1,8 @@
 module Types : sig
 
+  type bigstring =
+    (char,Bigarray.int8_unsigned_elt,Bigarray.c_layout) Bigarray.Array1.t
+
   module type MESSAGE_EXTRACTOR = sig
     type message
     type fragment
@@ -85,6 +88,8 @@ module Types : sig
     val write_bin_best : string -> int -> int -> fragment -> fragment
     val write_bin32_rope : Rope.t -> int -> int -> fragment -> fragment
     val write_bin_best_rope : Rope.t -> int -> int -> fragment -> fragment
+    val write_bin32_big : bigstring -> int -> int -> fragment -> fragment
+    val write_bin_best_big : bigstring -> int -> int -> fragment -> fragment
     val write_fixarray_start : int -> fragment -> fragment
     val write_fixarray_end : int -> fragment -> fragment
     val write_array16_start : int -> fragment -> fragment
@@ -130,6 +135,7 @@ module Extract : sig
     val extract_string : string -> int -> int -> X.message
     val extract_bytes : bytes -> int -> int -> X.message
     val extract_rope : Rope.t -> int -> int -> X.message
+    val extract_big : Types.bigstring -> int -> int -> X.message
   end
 end
 
@@ -137,6 +143,7 @@ module Composer : sig
   exception Error
   module Bytes : Types.MESSAGE_COMPOSER with type message = bytes
   module Rope : Types.MESSAGE_COMPOSER with type message = Rope.t
+  module Bigstring : Types.MESSAGE_COMPOSER with type message = Types.bigstring
   module Checker(C : Types.MESSAGE_COMPOSER) :
            Types.MESSAGE_COMPOSER with type message = C.message
 end
@@ -167,11 +174,13 @@ module Yojson : sig
     val extract_bytes : bytes -> int -> int -> json
     val extract_string : string -> int -> int -> json
     val extract_rope : Rope.t -> int -> int -> json
+    val extract_big : Types.bigstring -> int -> int -> json
     module Compose(C : Types.MESSAGE_COMPOSER) : sig
       val compose : json -> C.message
     end
 
     val compose_bytes : json -> bytes
     val compose_rope : json -> Rope.t
+    val compose_big : json -> Types.bigstring
   end
 end
