@@ -292,9 +292,8 @@ module Bigstring_reader = struct
   let read_string f (big:binmsg) pos endpos n frag =
     if !pos > endpos - n then raise Error;
     let by = sub_bytes big !pos n in
-    let p = !pos in
     pos := !pos + n;
-    f by p n frag
+    f by 0 n frag
 
   let read_size32 = make_read_size32 read_int32
 end

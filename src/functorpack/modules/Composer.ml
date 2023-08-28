@@ -217,6 +217,15 @@ module Bigstring_writer = struct
   let add_substring buf s =
     Buffer.add_substring buf.last s
 
+  let add_subbig buf big pos len =
+    queue_up buf;
+    let big_len = Bigarray.Array1.dim big in
+    if len < 0 || pos < 0 || pos > big_len - len then
+      invalid_arg "Composer.Bigstring_writer.add_subbig";
+    let s = Bigarray.Array1.sub big pos len in
+    Queue.add (Big s) buf.queue;
+    buf.length <- buf.length + len
+
   let add_subrope buf rope pos len =
     let rope_len = Rope.length rope in
     if len < 0 || pos < 0 || pos > rope_len - len then
@@ -227,21 +236,11 @@ module Bigstring_writer = struct
       let c = Rope.Iterator.get i in
       Bigarray.Array1.unsafe_set big k c;
       Rope.Iterator.incr i
-    done
-
-  let add_subbig buf big pos len =
-    queue_up buf;
-    let big_len = Bigarray.Array1.dim big in
-    if len < 0 || pos < 0 || pos > big_len - len then
-      invalid_arg "Composer.Bigstring_writer.add_subbig";
-    let s = Bigarray.Array1.sub big pos len in
-    Queue.add (Big s) buf.queue;
-    buf.length <- buf.length + len
+    done;
+    add_subbig buf big 0 len
 
   let add_message buf s =
-    queue_up buf;
-    Queue.add (Big s) buf.queue;
-    buf.length <- buf.length + Bigarray.Array1.dim s
+    add_subbig buf s 0 (Bigarray.Array1.dim s)
 end
 
 module Serialize(W : WRITER) = struct
