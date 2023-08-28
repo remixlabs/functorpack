@@ -139,7 +139,7 @@ end
 module Bigstring_writer = struct
   type element =
     | By of bytes
-    | Big of Types.bigstring
+    | Big of Types.bigstring * int * int
 
   type buffer =
     { queue : element Queue.t;
@@ -183,12 +183,11 @@ module Bigstring_writer = struct
            let len = Bytes.length by in
            blit_bytes by 0 s !k len;
            k := !k + len
-       | Big big ->
-           let len = Bigarray.Array1.dim big in
+       | Big (big, big_pos, big_len) ->
            Bigarray.Array1.blit
-             big
-             (Bigarray.Array1.sub s !k len);
-           k := !k + len
+             (Bigarray.Array1.sub big big_pos big_len)
+             (Bigarray.Array1.sub s !k big_len);
+           k := !k + big_len
       )
       buf.queue;
     assert(!k = n);
@@ -222,8 +221,7 @@ module Bigstring_writer = struct
     let big_len = Bigarray.Array1.dim big in
     if len < 0 || pos < 0 || pos > big_len - len then
       invalid_arg "Composer.Bigstring_writer.add_subbig";
-    let s = Bigarray.Array1.sub big pos len in
-    Queue.add (Big s) buf.queue;
+    Queue.add (Big(big, pos, len)) buf.queue;
     buf.length <- buf.length + len
 
   let add_subrope buf rope pos len =
