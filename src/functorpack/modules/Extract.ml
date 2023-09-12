@@ -227,6 +227,77 @@ module Rope_reader = struct
   let read_size32 = make_read_size32 read_int32
 end
 
+module Bigstring_reader = struct
+  type binmsg = Types.bigstring
+  type position = int ref
+
+  let length = Bigarray.Array1.dim
+  let get = Bigarray.Array1.get
+
+  let sub_bytes buf pos len =
+    let buf_len = Bigarray.Array1.dim buf in
+    if len < 0 || pos < 0 || pos > buf_len - len then
+      invalid_arg "Composer.Bigstring_reader.sub_bytes";
+    let by = Bytes.create len in
+    for k = 0 to len - 1 do
+      let c = Bigarray.Array1.unsafe_get buf (pos+k) in
+      Bytes.unsafe_set by k c
+    done;
+    by
+
+  let move by pos =
+    ref pos
+
+  let offset pos = !pos
+
+  let read_uint8 big pos endpos =
+    if !pos >= endpos then raise Error;
+    let n = Char.code(Bigarray.Array1.get big !pos) in
+    incr pos;
+    n
+
+  let read_char big pos endpos =
+    read_uint8 big pos endpos |> Char.unsafe_chr
+
+  let read_uint16 big pos endpos =
+    if !pos >= endpos-1 then raise Error;
+    let n =
+      (Char.code(Bigarray.Array1.get big !pos) lsl 8) lor
+        (Char.code(Bigarray.Array1.get big (!pos+1))) in
+    pos := !pos + 2;
+    n
+
+  let read_int32 big pos endpos =
+    let n1 = read_uint16 big pos endpos in
+    let n2 = read_uint16 big pos endpos in
+    Int32.logor
+      (Int32.shift_left (Int32.of_int n1) 16)
+      (Int32.of_int n2)
+
+  let read_int64 big pos endpos =
+    let n1 = read_int32 big pos endpos in
+    let n2 = read_int32 big pos endpos in
+    Int64.logor
+      (Int64.shift_left (Int64.of_int32 n1) 32)
+      (Int64.logand (Int64.of_int32 n2) 0xFFFF_FFFFL)
+
+  let read_int8 big pos endpos =
+    let n = read_uint8 big pos endpos in
+    if n >= 128 then n - 256 else n
+
+  let read_int16 big pos endpos =
+    let n = read_uint16 big pos endpos in
+    if n >= 32768 then n - 65536 else n
+
+  let read_string f (big:binmsg) pos endpos n frag =
+    if !pos > endpos - n then raise Error;
+    let by = sub_bytes big !pos n in
+    pos := !pos + n;
+    f by 0 n frag
+
+  let read_size32 = make_read_size32 read_int32
+end
+
 module MakeForReader(X : Types.MESSAGE_EXTRACTOR)(R : READER) = struct
   let rec loop n f x =
     if n=0 then x else
@@ -403,8 +474,10 @@ module Make(X : Types.MESSAGE_EXTRACTOR) = struct
   module ForString = MakeForReader(X)(String_reader)
   module ForBytes = MakeForReader(X)(Bytes_reader)
   module ForRope = MakeForReader(X)(Rope_reader)
+  module ForBigstring = MakeForReader(X)(Bigstring_reader)
 
   let extract_string = ForString.extract
   let extract_bytes = ForBytes.extract
   let extract_rope = ForRope.extract
+  let extract_big = ForBigstring.extract
 end

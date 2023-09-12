@@ -1,0 +1,11 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: public.ecr.aws/l8e3r2a5/rmx-ci-standard:latest
+    steps:
+      - checkout
+      - run: eval $(opam config env) && make setup.data
+      - run: eval $(opam config env) && make
+      - run: eval $(opam config env) && make test
