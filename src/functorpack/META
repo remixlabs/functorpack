@@ -1,5 +1,4 @@
 description = "MessagePack packer and unpacker"
-requires = "rope"
 archive(byte) = "FPack.cma"
 archive(native) = "FPack.cmxa"
 archive(native,plugin) = "FPack.cmxs"

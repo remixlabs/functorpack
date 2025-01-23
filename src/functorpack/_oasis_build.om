@@ -58,7 +58,6 @@ section
         OCAMLINCLUDES[] +=
             $(OASIS_getvar_for FPack, EXTRA_OCAMLINCLUDES)
         OCAMLPACKS[] +=
-            $"rope"
             $(OASIS_getvar_for FPack, EXTRA_OCAMLPACKS)
         DefineRules() =
             OASIS_build_OCamlPack($(NAME), $(MODULES))
@@ -88,7 +87,6 @@ if true
 OCAMLINCLUDES[] +=
     $(OASIS_getvar_for FPack, EXTRA_OCAMLINCLUDES)
 OCAMLPACKS[] +=
-    $"rope"
     $(OASIS_getvar_for FPack, EXTRA_OCAMLPACKS)
 OCAMLOPTFLAGS[] +=
     -for-pack

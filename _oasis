@@ -17,7 +17,6 @@ Library FPack
                      modules/Yojson
   Path:              src/functorpack
   Install:           true
-  BuildDepends:      rope
   FindlibName:       functorpack
 
 Library testing
@@ -31,4 +30,4 @@ Executable unittests
   MainIs:       Unittests.ml
   BuildDepends: functorpack, testing
   Install:      false
-  
+
