@@ -29,6 +29,6 @@ Library testing
 Executable unittests
   Path:         progs
   MainIs:       Unittests.ml
-  BuildDepends: functorpack, testing, rope
+  BuildDepends: functorpack, testing
   Install:      false
   

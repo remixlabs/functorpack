@@ -164,69 +164,6 @@ module Bytes_reader = struct
   let read_size32 = make_read_size32 read_int32
 end
 
-module Rope_reader = struct
-  type binmsg = Rope.t
-  type position = Rope.Iterator.t
-
-  let length = Rope.length
-  let get = Rope.get
-  let sub_bytes rope k len =
-    let by = Bytes.create len in
-    Rope.blit rope k by 0 len;
-    by
-
-  let move = Rope.Iterator.make
-  let offset ri = Rope.Iterator.pos ri
-
-  let read_uint8 by pos endpos =
-    if Rope.Iterator.pos pos >= endpos then raise Error;
-    let n = Char.code(Rope.Iterator.get pos) in
-    Rope.Iterator.incr pos;
-    n
-
-  let read_char by pos endpos =
-    read_uint8 by pos endpos |> Char.unsafe_chr
-
-  let read_uint16 by pos endpos =
-    if Rope.Iterator.pos pos >= endpos-1 then raise Error;
-    let c0 = Rope.Iterator.get pos in
-    Rope.Iterator.incr pos;
-    let c1 = Rope.Iterator.get pos in
-    Rope.Iterator.incr pos;
-    let n = (Char.code c0 lsl 8) lor (Char.code c1) in
-    n
-
-  let read_int32 by pos endpos =
-    let n1 = read_uint16 by pos endpos in
-    let n2 = read_uint16 by pos endpos in
-    Int32.logor
-      (Int32.shift_left (Int32.of_int n1) 16)
-      (Int32.of_int n2)
-
-  let read_int64 by pos endpos =
-    let n1 = read_int32 by pos endpos in
-    let n2 = read_int32 by pos endpos in
-    Int64.logor
-      (Int64.shift_left (Int64.of_int32 n1) 32)
-      (Int64.logand (Int64.of_int32 n2) 0xFFFF_FFFFL)
-
-  let read_int8 by pos endpos =
-    let n = read_uint8 by pos endpos in
-    if n >= 128 then n - 256 else n
-
-  let read_int16 by pos endpos =
-    let n = read_uint16 by pos endpos in
-    if n >= 32768 then n - 65536 else n
-
-  let read_string f rope pos endpos n frag =
-    if offset pos > endpos - n then raise Error;
-    let by = sub_bytes rope (offset pos) n in
-    Rope.Iterator.move pos n;
-    f by 0 n frag
-
-  let read_size32 = make_read_size32 read_int32
-end
-
 module Bigstring_reader = struct
   type binmsg = Types.bigstring
   type position = int ref
@@ -473,11 +410,9 @@ end
 module Make(X : Types.MESSAGE_EXTRACTOR) = struct
   module ForString = MakeForReader(X)(String_reader)
   module ForBytes = MakeForReader(X)(Bytes_reader)
-  module ForRope = MakeForReader(X)(Rope_reader)
   module ForBigstring = MakeForReader(X)(Bigstring_reader)
 
   let extract_string = ForString.extract
   let extract_bytes = ForBytes.extract
-  let extract_rope = ForRope.extract
   let extract_big = ForBigstring.extract
 end

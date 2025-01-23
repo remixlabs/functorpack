@@ -212,10 +212,6 @@ module Safe = struct
     let module E = Extract.Make(Extractor) in
     E.extract_string by pos len
 
-  let extract_rope by pos len =
-    let module E = Extract.Make(Extractor) in
-    E.extract_rope by pos len
-
   let extract_big by pos len =
     let module E = Extract.Make(Extractor) in
     E.extract_big by pos len
@@ -274,11 +270,6 @@ module Safe = struct
 
   let compose_bytes json =
     let module C = Composer.Checker(Composer.Bytes) in
-    let module P = Compose(C) in
-    P.compose json
-
-  let compose_rope json =
-    let module C = Composer.Checker(Composer.Rope) in
     let module P = Compose(C) in
     P.compose json
 
