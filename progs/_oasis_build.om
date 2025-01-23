@@ -12,7 +12,6 @@ section
         NATIVE_ENABLED = $"false"
         MAIN_MODULE = $"Unittests"
         OCAMLPACKS[] =
-            $"rope"
             $"str"
             $(OASIS_getvar EXTRA_OCAMLPACKS)
         OCAML_LIBS[] =
