@@ -97,11 +97,6 @@ let ce_bytes =
     extract = (fun s -> Yojson.Safe.extract_bytes s 0 (Bytes.length s));
   }
 
-let ce_rope =
-  { compose = Yojson.Safe.compose_rope;
-    extract = (fun s -> Yojson.Safe.extract_rope s 0 (Rope.length s));
-  }
-
 let ce_big =
   { compose = Yojson.Safe.compose_big;
     extract = (fun s -> Yojson.Safe.extract_big s 0 (Bigarray.Array1.dim s));
@@ -115,14 +110,6 @@ let tests =
     "test005", test005 ce_bytes;
     "test006", test006 ce_bytes;
     "test007", test007 ce_bytes;
-
-    "test101", test001 ce_rope;
-    "test102", test002 ce_rope;
-    "test103", test003 ce_rope;
-    "test104", test004 ce_rope;
-    "test105", test005 ce_rope;
-    "test106", test006 ce_rope;
-    "test107", test007 ce_rope;
 
     "test201", test001 ce_big;
     "test202", test002 ce_big;

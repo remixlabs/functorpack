@@ -12,7 +12,6 @@ module type WRITER = sig
   val add_int64 : buffer -> int64 -> unit
   val add_size32 : buffer -> int -> unit
   val add_substring : buffer -> string -> int -> int -> unit
-  val add_subrope : buffer -> Rope.t -> int -> int -> unit
   val add_subbig : buffer -> Types.bigstring -> int -> int -> unit
   val add_message : buffer -> message -> unit
 end
@@ -60,10 +59,6 @@ module Bytes_writer = struct
   let add_substring =
     Buffer.add_substring
 
-  let add_subrope buf rope p len =
-    let srope = Rope.sub rope p len in
-    Buffer.add_string buf (Rope.to_string srope)
-
   let add_subbig buf big pos len =
     let big_len = Bigarray.Array1.dim big in
     if len < 0 || pos < 0 || pos > big_len - len then
@@ -77,63 +72,6 @@ module Bytes_writer = struct
 
   let add_message =
     Buffer.add_bytes
-end
-
-module Rope_writer = struct
-  type buffer = Rope.Buffer.t
-  type message = Rope.t
-
-  let create() = Rope.Buffer.create 100
-  let compose frag = Rope.Buffer.contents frag
-
-  let add_char = Rope.Buffer.add_char
-
-  let add_int8 buf n =
-    Rope.Buffer.add_char buf (Char.unsafe_chr (n land 0xff))
-
-  let add_int16 buf n =
-    let by = Bytes.create 2 in
-    Bytes.set by 0 (Char.unsafe_chr ((n lsr 8) land 0xff));
-    Bytes.set by 1 (Char.unsafe_chr (n land 0xff));
-    Rope.Buffer.add_string buf (Bytes.unsafe_to_string by)
-
-  let add_int32 buf n =
-    let by = Bytes.create 4 in
-    let k0 = Int32.shift_right_logical n 24 |> Int32.to_int in
-    let k1 = Int32.shift_right_logical n 16 |> Int32.to_int in
-    let k2 = Int32.shift_right_logical n 8 |> Int32.to_int in
-    let k3 = Int32.to_int n in
-    Bytes.set by 0 (Char.unsafe_chr (k0 land 0xff));
-    Bytes.set by 1 (Char.unsafe_chr (k1 land 0xff));
-    Bytes.set by 2 (Char.unsafe_chr (k2 land 0xff));
-    Bytes.set by 3 (Char.unsafe_chr (k3 land 0xff));
-    Rope.Buffer.add_string buf (Bytes.unsafe_to_string by)
-
-  let add_int64 buf n =
-    add_int32 buf (Int64.to_int32 (Int64.shift_right n 32));
-    add_int32 buf (Int64.to_int32 n)
-
-  let add_size32 =
-    make_add_size32 add_int32
-
-  let add_substring =
-    Rope.Buffer.add_substring
-
-  let add_subrope buf rope p len =
-    let srope = Rope.sub rope p len in
-    Rope.Buffer.add_rope buf srope
-
-  let add_subbig buf big pos len =
-    let big_len = Bigarray.Array1.dim big in
-    if len < 0 || pos < 0 || pos > big_len - len then
-      invalid_arg "Composer.Rope_writer.add_subbig";
-    for k = 0 to len - 1 do
-      let c = Bigarray.Array1.unsafe_get big (pos + k) in
-      Rope.Buffer.add_char buf c
-    done
-
-  let add_message =
-    Rope.Buffer.add_rope
 end
 
 module Bigstring_writer = struct
@@ -223,19 +161,6 @@ module Bigstring_writer = struct
       invalid_arg "Composer.Bigstring_writer.add_subbig";
     Queue.add (Big(big, pos, len)) buf.queue;
     buf.length <- buf.length + len
-
-  let add_subrope buf rope pos len =
-    let rope_len = Rope.length rope in
-    if len < 0 || pos < 0 || pos > rope_len - len then
-      invalid_arg "Composer.Rope_writer.add_subrope";
-    let big = Bigarray.Array1.create Bigarray.char Bigarray.c_layout len in
-    let i = Rope.Iterator.make rope pos in
-    for k = 0 to len - 1 do
-      let c = Rope.Iterator.get i in
-      Bigarray.Array1.unsafe_set big k c;
-      Rope.Iterator.incr i
-    done;
-    add_subbig buf big 0 len
 
   let add_message buf s =
     add_subbig buf s 0 (Bigarray.Array1.dim s)
@@ -435,14 +360,6 @@ module Serialize(W : WRITER) = struct
     W.add_substring buf s pos len;
     buf
 
-  let write_bin32_rope s pos len buf =
-    if pos < 0 || len < 0 || pos > Rope.length s - len then
-      invalid_arg "FPack.Composer.Serialize.write_bin32_rope";
-    W.add_char buf '\xc6';
-    W.add_size32 buf len;
-    W.add_subrope buf s pos len;
-    buf
-
   let write_bin32_big s pos len buf =
     if pos < 0 || len < 0 || pos > Bigarray.Array1.dim s - len then
       invalid_arg "FPack.Composer.Serialize.write_bin32_big";
@@ -460,17 +377,6 @@ module Serialize(W : WRITER) = struct
       if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
         raise Error;
       write_bin32 s pos n buf
-    )
-
-  let write_bin_best_rope s pos n buf =
-    if n <= 255 then
-      write_bin8 (Rope.to_string s) pos n buf
-    else if n <= 65535 then
-      write_bin16 (Rope.to_string s) pos n buf
-    else (
-      if Sys.word_size=64 && n > Int32.to_int Int32.max_int then
-        raise Error;
-      write_bin32_rope s pos n buf
     )
 
   let write_bin_best_big s pos n buf =
@@ -657,7 +563,6 @@ module Serialize(W : WRITER) = struct
 end
 
 module Bytes = Serialize(Bytes_writer)
-module Rope = Serialize(Rope_writer)
 module Bigstring = Serialize(Bigstring_writer)
 
 module Checker(C : Types.MESSAGE_COMPOSER) = struct
@@ -741,8 +646,6 @@ module Checker(C : Types.MESSAGE_COMPOSER) = struct
   let write_bin16 s p l (frag,cl) = (C.write_bin16 s p l frag, record cl)
   let write_bin32 s p l (frag,cl) = (C.write_bin32 s p l frag, record cl)
   let write_bin_best s p l (frag,cl) = (C.write_bin_best s p l frag, record cl)
-  let write_bin32_rope s p l (frag,cl) = (C.write_bin32_rope s p l frag, record cl)
-  let write_bin_best_rope s p l (frag,cl) = (C.write_bin_best_rope s p l frag, record cl)
   let write_bin32_big s p l (frag,cl) = (C.write_bin32_big s p l frag, record cl)
   let write_bin_best_big s p l (frag,cl) = (C.write_bin_best_big s p l frag, record cl)
   let write_fixext1 t n (frag,cl) = (C.write_fixext1 t n frag, record cl)

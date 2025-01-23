@@ -84,8 +84,6 @@ module type MESSAGE_COMPOSER = sig
   val write_bin16 : string -> int -> int -> fragment -> fragment
   val write_bin32 : string -> int -> int -> fragment -> fragment
   val write_bin_best : string -> int -> int -> fragment -> fragment
-  val write_bin32_rope : Rope.t -> int -> int -> fragment -> fragment
-  val write_bin_best_rope : Rope.t -> int -> int -> fragment -> fragment
   val write_bin32_big : bigstring -> int -> int -> fragment -> fragment
   val write_bin_best_big : bigstring -> int -> int -> fragment -> fragment
   val write_fixarray_start : int -> fragment -> fragment
