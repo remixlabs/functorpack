@@ -16,6 +16,10 @@ include _oasis_install.om
 DefineBuildRules()
 DefineInstallRules()
 
+if $(equal $(OSTYPE), Win32)
+    .PHONY: unittests
+    unittests: unittests$(EXE)
+
 build-here: $(BUILD_TARGETS)
 doc-here: $(BUILD_DOC_TARGETS)
 install-here: $(INSTALL_TARGETS)
